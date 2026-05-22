@@ -49,7 +49,7 @@ x0 = [x_hat(1,:), x_hat(2,:), mean(x_hat(3,:)), mean(x_hat(4,:)), x_hat(5,:), x_
 x0 = [x0; normrnd(priors.theta.mu, priors.theta.sigma, 4, 1)];
 [x,fval,exitflag,output,grad,hessian] = fminunc(nl_post_obj, x0, options);
 
-save("Results\iso_results.mat", "x", "fval", "exitflag", "output", "grad", "hessian", "x_ind", "fval_ind", "exitflag_ind", "output_ind", "grad_ind", "hessian_ind")
+save("iso_MAP_results.mat", "x", "fval", "exitflag", "output", "grad", "hessian", "x_ind", "fval_ind", "exitflag_ind", "output_ind", "grad_ind", "hessian_ind")
 
 function [psi, grad] = nl_post_ind(lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth, kT, kD, obs, lnsx, lnsy, f, Nx, dr, priors)
     % random variables: lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth,
