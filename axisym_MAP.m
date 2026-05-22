@@ -2,10 +2,10 @@ clear; clc; close all;
 
 seed = rng("shuffle");
 
-data = load("Data\axisym_data_stats.mat");
+data = load("Data/axisym_data_stats.mat");
 T = data.T;
 
-material_fits = load("True_Params\true_mat_params.mat");
+material_fits = load("True_Params/true_mat_params.mat");
 lnkf = log(polyval(material_fits.gold_film.k, T));
 lnCf = log(polyval(material_fits.gold_film.c, T).*polyval(material_fits.gold_film.rho, T));
 lnaf = log(material_fits.gold_film.alpha);
@@ -16,7 +16,7 @@ lnCs = log(polyval(material_fits.graphite.c, T) .* polyval(material_fits.graphit
 lnas = log(material_fits.graphite.alpha);
 lnRth = -inf;
 
-Os = load("True_Params\gold_graphite_O.mat");
+Os = load("True_Params/gold_graphite_O.mat");
 Os = Os.v;
 
 lnsx = log(2);
