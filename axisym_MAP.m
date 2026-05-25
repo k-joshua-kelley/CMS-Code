@@ -32,7 +32,7 @@ load("axisym_priors.mat")
 
 nl_post_handle = @(x) axisym_nl_post(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:46),x(47:56),x(57:66),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu, x(67), data.kappa, x(68:72), T, priors);
 
-options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true);
+options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=1000);
 
 load("axisym_MAP_results_ws0.mat")
 
@@ -81,8 +81,6 @@ if nargout > 3
         Geq(46+i, i) = 2*x(46+i); % second column
         Geq(56+i, i) = 2*x(56+i); % third column
     end
-
-    Geq = Geq.';
 
 end
 end
