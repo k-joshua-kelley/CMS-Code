@@ -14,7 +14,7 @@ d = length(x);
 diff = x - mu;
 
 % Cholesky
-L = chol(C,'lower');
+L = chol(0.5.*C.*C.','lower');
 
 % log det
 logdetS = 2*sum(log(diag(L)));
