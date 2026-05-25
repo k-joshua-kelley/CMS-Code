@@ -26,8 +26,8 @@ smp = hmcSampler( ...
     MassVector=hmc_params.massVector ...
 );
 
-[chain,endpoint,accratio] = drawSamples(smp, Burnin=100, NumSamples=500, ThinSize=2, VerbosityLevel=1);
-save("samples_Nsteps10_Burn100_Thin2_"+ts+".mat", "chain", "endpoint", "accratio");
+[chain,endpoint,accratio] = drawSamples(smp, Burnin=500, NumSamples=2000, ThinSize=1, VerbosityLevel=1);
+save("samples_Nsteps10_Burn500_Thin1_"+ts+".mat", "chain", "endpoint", "accratio");
 
 function [nlp, grad] = log_post_obj(x, kD, obs, lnsx, lnsy, f, Nx, dr, T, priors_new)
     if nargout < 2
