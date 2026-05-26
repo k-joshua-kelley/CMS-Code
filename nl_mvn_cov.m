@@ -10,10 +10,6 @@ arguments (Output)
     grad (:,1) cell
 end
 
-x
-mu
-C
-
 d = length(x);
 diff = x - mu;
 

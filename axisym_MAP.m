@@ -40,7 +40,7 @@ No = length(data.mu(1,:,1,1));
 Os0 = [mean(x_ws(:,7)), mean(x_ws(:,8)), mean(x_ws(:,9))] .* ones(No,1);
 x0 = [x_ws(:,1); x_ws(:,2); mean(x_ws(:,3)); x_ws(:,4); x_ws(:,5); x_ws(:,6); Os0(:); 0; normrnd(priors.theta.mu, priors.theta.sigma, 5,1)];
 
-[x,fval,exitflag,output,lambda,grad] = fmincon(@nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
+[x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
 save("axisym_MAP_results"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", ...
     "x_ws", "fval_ws", "exitflag_ws", "output_ws", "lambda_ws", "grad_ws", "seed2");
