@@ -30,7 +30,7 @@ x_max = max(max(sqrt(X_probe(:,1).^2+X_probe(:,2).^2))*10, 1*max(Lthf, Lths));
 
 load("axisym_priors.mat")
 
-nl_post_handle = @(x) axisym_nl_post(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:46),x(47:56),x(57:66),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu, x(67), data.kappa, x(68:72), T, priors);
+nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:46),x(47:56),x(57:66),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu, x(67), data.kappa, x(68:72), T, priors);
 
 options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=1000);
 
@@ -40,10 +40,7 @@ No = length(data.mu(1,:,1,1));
 Os0 = [mean(x_ws(:,7)), mean(x_ws(:,8)), mean(x_ws(:,9))] .* ones(No,1);
 x0 = [x_ws(:,1); x_ws(:,2); mean(x_ws(:,3)); x_ws(:,4); x_ws(:,5); x_ws(:,6); Os0(:); 0; normrnd(priors.theta.mu, priors.theta.sigma, 5,1)];
 
-ub = inf(size(x0));
-ub(end-4:end) = 10;
-
-[x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], ub, @nonlcon, options);
+[x,fval,exitflag,output,lambda,grad] = fmincon(@nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
 save("axisym_MAP_results"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", ...
     "x_ws", "fval_ws", "exitflag_ws", "output_ws", "lambda_ws", "grad_ws", "seed2");
@@ -86,4 +83,19 @@ if nargout > 3
     end
 
 end
+end
+
+function [psi, grad] = axisym_nl_post_helper(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_par,lnCs,lnas,lnRth,Os1,Os2,Os3,lnsx,lnsy,f,Nx,X_probe,x_max, obs, kT, kD, theta, T, priors)
+    try
+        if nargout < 2
+            psi = axisym_nl_post(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_par,lnCs,lnas,lnRth,Os1,Os2,Os3,lnsx,lnsy,f,Nx,X_probe,x_max, obs, kT, kD, theta, T, priors);
+        else
+            [psi, grad] = axisym_nl_post(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_par,lnCs,lnas,lnRth,Os1,Os2,Os3,lnsx,lnsy,f,Nx,X_probe,x_max, obs, kT, kD, theta, T, priors);
+        end
+    catch err
+        ts = string(datetime("now", 'Format', 'yyyy-MM-dd_HH-mm-ss'));
+        save("error_" + ts + ".mat", "lnkf", "lnCf", "lnaf", "lnhf", "lnks_perp", "lnks_par", "lnCs", "lnas", "lnRth", "Os1", "Os2", "Os3", "lnsx", "lnsy", "f", "Nx", "X_probe", "x_max", "obs", "kT", "kD", "theta", "T", "priors", "err")
+        psi = NaN;
+        grad = NaN(72,1);
+    end
 end
