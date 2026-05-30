@@ -1,7 +1,8 @@
 clear; clc; close all;
 
-rng("shuffle");
-seed2 = rng();
+load("axisym_MAP_results1660744828.mat")
+
+rng(seed2.Seed);
 
 data = load("Data/axisym_data_stats.mat");
 T = data.T;
@@ -34,16 +35,9 @@ nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x
 
 options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=500);
 
-load("axisym_MAP_results_ws0.mat")
+[x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x, [], [], [], [], [], [], @nonlcon, options);
 
-No = length(data.mu(1,:,1,1));
-Os0 = [mean(x_ws(:,7)), mean(x_ws(:,8)), mean(x_ws(:,9))] .* ones(No,1);
-x0 = [x_ws(:,1); x_ws(:,2); mean(x_ws(:,3)); x_ws(:,4); x_ws(:,5); x_ws(:,6); Os0(:); 0; normrnd(priors.theta.mu, priors.theta.sigma, 5,1)];
-
-[x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
-
-save("axisym_MAP_results"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", ...
-    "x_ws", "fval_ws", "exitflag_ws", "output_ws", "lambda_ws", "grad_ws", "seed2");
+save("axisym_MAP_results(2)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
 
 function [ineq, eq, Gineq, Geq] = nonlcon(x)
 
