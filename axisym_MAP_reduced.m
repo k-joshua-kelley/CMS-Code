@@ -40,15 +40,18 @@ options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="ite
 
 x0 = x([1:36,36+Oi,46+Oi,56+Oi,68:72]);
 
+[~, err] = checkGradients(@check_nonlcon, x0, options, "Display","on");
+max(abs(err.Objective(:)))
+[~, err] = checkGradients(nl_post_handle, x0, options, "Display","on");
+max(abs(err.Objective(:)))
 [x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
 save("axisym_MAP_results_reduced"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
 
-function [p, grad] = check_GP_prior(x, priors)
-    [p, grad_GP_lnks_par, grad_GP_theta4] = nl_GP_prior(x(1:7), priors.lnks_par.mu*ones(7,1), priors.lnks_par.sigma*ones(7,1), (300:100:900).', x(8));
-    grad = [grad_GP_lnks_par; grad_GP_theta4];
+function [eq, Jeq] = check_nonlcon(x)
+    [~, eq, ~, Geq] = nonlcon(x);
+    Jeq = Geq.';
 end
-
 function [ineq, eq, Gineq, Geq] = nonlcon(x)
 
 arguments
@@ -101,6 +104,6 @@ function [psi, grad] = axisym_nl_post_helper(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_
         ts = string(datetime("now", 'Format', 'yyyy-MM-dd_HH-mm-ss'));
         save("error_" + ts + ".mat", "lnkf", "lnCf", "lnaf", "lnhf", "lnks_perp", "lnks_par", "lnCs", "lnas", "lnRth", "Os1", "Os2", "Os3", "lnsx", "lnsy", "f", "Nx", "X_probe", "x_max", "obs", "kT", "kD", "theta", "T", "priors", "err")
         psi = NaN;
-        grad = NaN(72,1);
+        grad = NaN(56,1);
     end
 end
