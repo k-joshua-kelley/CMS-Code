@@ -40,7 +40,7 @@ options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="ite
 
 x0 = x([1:36,36+Oi,46+Oi,56+Oi,68:72]);
 
-[x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x, [], [], [], [], [], [], @nonlcon, options);
+[x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
 save("axisym_MAP_results_reduced"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
 
