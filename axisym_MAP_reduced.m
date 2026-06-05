@@ -36,7 +36,7 @@ Oi = randperm(10,5);
 
 nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:41),x(42:46),x(47:51),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu(:,Oi,:,:), 1e4, data.kappa(:,Oi,:,:), x(52:56), T, priors);
 
-options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=500);
+options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=1000);
 
 x0 = x;
 
