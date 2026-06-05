@@ -1,7 +1,7 @@
 clear; clc; close all;
 
 load("axisym_MAP_results1660744828.mat")
-load("axisym_MAP_results(2)1660744828.mat")
+load("axisym_MAP_results_reduced1660744828.mat")
 
 rng(seed2.Seed);
 
@@ -38,7 +38,7 @@ nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x
 
 options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=500);
 
-x0 = x([1:36,36+Oi,46+Oi,56+Oi,68:72]);
+x0 = x;
 
 [~, err] = checkGradients(@check_nonlcon, x0, options, "Display","on");
 max(abs(err.Objective(:)))
@@ -46,7 +46,7 @@ max(abs(err.Objective(:)))
 max(abs(err.Objective(:)))
 [x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
-save("axisym_MAP_results_reduced"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
+save("axisym_MAP_results_reduced(2)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
 
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
