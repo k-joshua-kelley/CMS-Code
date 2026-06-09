@@ -1,7 +1,7 @@
 clear; clc; close all;
 
 load("axisym_MAP_results1660744828.mat")
-load("axisym_MAP_results_reduced1660744828.mat")
+load("axisym_MAP_results_reduced(2)1660744828.mat")
 
 rng(seed2.Seed);
 
@@ -36,7 +36,7 @@ Oi = randperm(10,5);
 
 nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:41),x(42:46),x(47:51),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu(:,Oi,:,:), 1e4, data.kappa(:,Oi,:,:), x(52:56), T, priors);
 
-options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=1000);
+options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=1000, Algorithm="sqp");
 
 x0 = x;
 
@@ -46,7 +46,7 @@ max(abs(err.Objective(:)))
 max(abs(err.Objective(:)))
 [x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
-save("axisym_MAP_results_reduced(2)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
+save("axisym_MAP_results_reduced(3)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
 
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
