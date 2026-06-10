@@ -40,7 +40,7 @@ nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x
 
 options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=1000);
 
-x0 = x;
+x0 = x(1:51);
 
 % [~, err] = checkGradients(@check_nonlcon, x0, options, "Display","on");
 % max(abs(err.Objective(:)))
