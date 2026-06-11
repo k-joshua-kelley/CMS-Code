@@ -1,7 +1,7 @@
 clear; clc; close all;
 
 load("axisym_MAP_results1660744828.mat")
-load("axisym_MAP_results_reduced(2)1660744828.mat")
+load("axisym_MAP_results_reduced(3)1660744828.mat")
 
 rng(seed2.Seed);
 
@@ -46,7 +46,7 @@ max(abs(err.Objective(:)))
 max(abs(err.Objective(:)))
 [x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
-save("axisym_MAP_results_reduced(3)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
+save("axisym_MAP_results_reduced(4)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
 
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
