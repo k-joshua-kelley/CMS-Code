@@ -1,5 +1,5 @@
 function axisym_MAP_MMAP(perm_str)
-perm_str
+disp(perm_str)
 
 res = load("axisym_MAP_results1660744828.mat");
 seed2 = res.seed2;
@@ -7,6 +7,7 @@ res = load("axisym_MAP_results_reduced(3)1660744828.mat");
 x = res.x;
 
 rng(seed2.Seed);
+save("axisym_MMAP"+perm_str+"_results"+seed2.Seed+".mat", "perm_str");
 
 data = load("Data/axisym_data_stats.mat");
 T = data.T;
@@ -39,7 +40,8 @@ priors = priors.priors;
 Oi = randperm(10,5);
 
 h = 1e-2;
-thetas = x(52:56)
+thetas = x(52:56);
+disp(thetas(:).');
 i = 1;
 for c = char(perm_str)
     switch c
@@ -53,7 +55,7 @@ for c = char(perm_str)
     end
     i = i+1;
 end
-thetas
+disp(thetas(:).');
 
 nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:41),x(42:46),x(47:51),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu(:,Oi,:,:), 1e4, data.kappa(:,Oi,:,:), thetas, T, priors);
 
@@ -67,7 +69,7 @@ x0 = x(1:51);
 % max(abs(err.Objective(:)))
 [x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
-save("axisym_MMAP"+perm_str+"_results"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "thetas");
+save("axisym_MMAP"+perm_str+"_results"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "thetas", "perm_str");
 end
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
