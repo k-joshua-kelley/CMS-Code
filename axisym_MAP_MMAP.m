@@ -3,7 +3,7 @@ disp(perm_str)
 
 res = load("axisym_MAP_results1660744828.mat");
 seed2 = res.seed2;
-res = load("axisym_MAP_results_reduced(3)1660744828.mat");
+res = load("axisym_MAP_results_reduced(6)1660744828.mat");
 x = res.x;
 
 rng(seed2.Seed);
@@ -39,7 +39,7 @@ priors = priors.priors;
 
 Oi = randperm(10,5);
 
-h = 1e-2;
+h = 1e-4;
 thetas = x(52:56);
 disp(thetas(:).');
 i = 1;
@@ -59,7 +59,16 @@ disp(thetas(:).');
 
 nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:41),x(42:46),x(47:51),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu(:,Oi,:,:), 1e4, data.kappa(:,Oi,:,:), thetas, T, priors);
 
-options = optimoptions("fmincon", "FiniteDifferenceType","central", Display="iter-detailed",SpecifyConstraintGradient=true, SpecifyObjectiveGradient=true, MaxFunctionEvaluations=1000);
+options = optimoptions("fmincon", ...
+    FiniteDifferenceType="central", ...
+    Display="iter-detailed", ...
+    SpecifyConstraintGradient=true, ...
+    SpecifyObjectiveGradient=true, ...
+    MaxFunctionEvaluations=250, ...
+    Algorithm="interior-point", ...
+    EnableFeasibilityMode=true, ...
+    SubproblemAlgorithm="cg"...
+);
 
 x0 = x(1:51);
 
