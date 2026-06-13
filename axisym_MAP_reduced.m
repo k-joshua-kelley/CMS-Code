@@ -1,7 +1,7 @@
 clear; clc; close all;
 
 load("axisym_MAP_results1660744828.mat")
-load("axisym_MAP_results_reduced(4a)1660744828.mat")
+load("axisym_MAP_results_reduced(5a)1660744828.mat")
 
 rng(seed2.Seed);
 
@@ -42,7 +42,9 @@ options = optimoptions("fmincon", ...
     SpecifyConstraintGradient=true, ...
     SpecifyObjectiveGradient=true, ...
     MaxFunctionEvaluations=9000, ...
-    Algorithm="sqp" ...
+    Algorithm="interior-point", ...
+    EnableFeasibilityMode=true, ...
+    SubproblemAlgorithm="cg"...
 );
 
 x0 = x;
@@ -53,7 +55,7 @@ max(abs(err.Objective(:)))
 max(abs(err.Objective(:)))
 [x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
-save("axisym_MAP_results_reduced(5a)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
+save("axisym_MAP_results_reduced(6)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
 
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
