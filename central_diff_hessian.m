@@ -11,6 +11,8 @@ function H = central_diff_hessian(fun, x, h)
         H(:,j) = 0.5*(gp+gm)/h;
         assert(length(gp)==n);
         assert(length(gm)==n);
+        disp("Progress:" + j + "/" + n)
     end
+    disp(H);
     H = 0.5*(H+H.');
 end
