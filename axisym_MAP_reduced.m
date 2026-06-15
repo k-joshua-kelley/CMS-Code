@@ -1,7 +1,7 @@
 clear; clc; close all;
 
 load("axisym_MAP_results1660744828.mat")
-load("axisym_MAP_results_reduced(5a)1660744828.mat")
+load("axisym_MAP_results_reduced(6)1660744828.mat")
 
 rng(seed2.Seed);
 
@@ -55,7 +55,9 @@ max(abs(err.Objective(:)))
 max(abs(err.Objective(:)))
 [x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
 
-save("axisym_MAP_results_reduced(6)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad");
+H = central_diff_hessian(nl_post_handle, x, 1e-4);
+
+save("axisym_MAP_results_reduced(6)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "H");
 
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
