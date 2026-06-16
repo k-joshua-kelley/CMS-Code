@@ -3,7 +3,7 @@ disp(perm_str)
 
 res = load("axisym_MAP_results1660744828.mat");
 seed2 = res.seed2;
-res = load("axisym_MMAP"+perm_str+"_results"+seed2.Seed+".mat");
+res = load("axisym_MMAP(e-4)"+perm_str+"_results"+seed2.Seed+".mat");
 x = res.x;
 fval = res.fval;
 exitflag = res.exitflag;
