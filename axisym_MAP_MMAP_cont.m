@@ -1,13 +1,18 @@
-function axisym_MAP_MMAP(perm_str)
+function axisym_MAP_MMAP_cont(perm_str)
 disp(perm_str)
 
 res = load("axisym_MAP_results1660744828.mat");
 seed2 = res.seed2;
-res = load("axisym_MAP_results_reduced(6)1660744828.mat");
+res = load("axisym_MMAP"+perm_str+"_results"+seed2.Seed+".mat");
 x = res.x;
+fval = res.fval;
+exitflag = res.exitflag;
+output = res.output;
+lambda = res.lambda;
+grad = res.grad;
+thetas = res.thetas;
 
 rng(seed2.Seed);
-save("axisym_MMAP"+perm_str+"_results"+seed2.Seed+".mat", "perm_str");
 
 data = load("Data/axisym_data_stats.mat");
 T = data.T;
@@ -39,44 +44,9 @@ priors = priors.priors;
 
 Oi = randperm(10,5);
 
-h = 1e-4;
-thetas = x(52:56);
-disp(thetas(:).');
-i = 1;
-for c = char(perm_str)
-    switch c
-        case '+'
-            thetas(i) = thetas(i) + h;
-        case '-'
-            thetas(i) = thetas(i) - h;
-        case '0'
-        otherwise
-            error("unrecognized perm_string")
-    end
-    i = i+1;
-end
-disp(thetas(:).');
-
 nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:41),x(42:46),x(47:51),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu(:,Oi,:,:), 1e4, data.kappa(:,Oi,:,:), thetas, T, priors);
 
-options = optimoptions("fmincon", ...
-    FiniteDifferenceType="central", ...
-    Display="iter-detailed", ...
-    SpecifyConstraintGradient=true, ...
-    SpecifyObjectiveGradient=true, ...
-    MaxFunctionEvaluations=250, ...
-    Algorithm="interior-point", ...
-    EnableFeasibilityMode=true, ...
-    SubproblemAlgorithm="cg"...
-);
-
-x0 = x(1:51);
-
-% [~, err] = checkGradients(@check_nonlcon, x0, options, "Display","on");
-% max(abs(err.Objective(:)))
-% [~, err] = checkGradients(nl_post_handle, x0, options, "Display","on");
-% max(abs(err.Objective(:)))
-[x,fval,exitflag,output,lambda,grad] = fmincon(nl_post_handle, x0, [], [], [], [], [], [], @nonlcon, options);
+x = x(1:51);
 
 h = 1e-4;
 H = central_diff_hessian(nl_post_handle, x, h);
