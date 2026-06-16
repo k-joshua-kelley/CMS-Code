@@ -51,7 +51,7 @@ x = x(1:51);
 h = 1e-4;
 H = central_diff_hessian(nl_post_handle, x, h);
 
-save("axisym_MMAP"+perm_str+"_results"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "thetas", "perm_str", "H", "h");
+save("axisym_MMAP_cont(e-4)"+perm_str+"_results"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "thetas", "perm_str", "H", "h");
 end
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
