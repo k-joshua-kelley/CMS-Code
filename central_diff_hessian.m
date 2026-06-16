@@ -1,18 +1,24 @@
 function H = central_diff_hessian(fun, x, h)
     n = length(x);
     H = zeros(n,n);
+
     for j = 1:n
-        x0 = x;
-        x0(j) = x0(j) + h;
-        [~,gp] = fun(x0);
-        x0 = x;
-        x0(j) = x0(j) - h;
-        [~,gm] = fun(x0);
-        H(:,j) = 0.5*(gp+gm)/h;
+        xp = x; xp(j) = xp(j) + h;
+        xm = x; xm(j) = xm(j) - h;
+
+        [~,gp] = fun(xp);
+        [~,gm] = fun(xm);
+
+        save(j + "_gradients.mat", "xp", "gp", "xm", "gm")
+
         assert(length(gp)==n);
         assert(length(gm)==n);
+
+        H(:,j) = (gp - gm) / (2*h);
+
         disp("Progress:" + j + "/" + n)
     end
-    disp(H);
-    H = 0.5*(H+H.');
+    save("raw_H.mat", "H")
+
+    H = 0.5*(H + H.');
 end
