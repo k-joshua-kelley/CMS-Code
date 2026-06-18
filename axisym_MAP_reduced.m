@@ -34,7 +34,7 @@ load("axisym_priors.mat")
 
 Oi = randperm(10,5);
 
-nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:41),x(42:46),x(47:51),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu(:,Oi,:,:), 1e4, data.kappa(:,Oi,:,:), x(52:56), T, priors);
+nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:41),x(42:46),x(47:51),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu(:,Oi,:,:), x(52), data.kappa(:,Oi,:,:), x(53:57), T, priors);
 
 options = optimoptions("fmincon", ...
     FiniteDifferenceType="central", ...
@@ -47,7 +47,9 @@ options = optimoptions("fmincon", ...
     SubproblemAlgorithm="cg"...
 );
 
-x0 = x;
+x0 = zeros(57,1);
+x0([1:51,53:end]) = x;
+x0(52) = log(1e4);
 
 [~, err] = checkGradients(@check_nonlcon, x0, options, "Display","on");
 max(abs(err.Objective(:)))
@@ -57,7 +59,7 @@ max(abs(err.Objective(:)))
 
 H = central_diff_hessian(nl_post_handle, x, 1e-4);
 
-save("axisym_MAP_results_reduced(6)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "H");
+save("axisym_MAP_results_reduced(7)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "H");
 
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
@@ -103,13 +105,19 @@ if nargout > 3
 end
 end
 
-function [psi, grad] = axisym_nl_post_helper(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_par,lnCs,lnas,lnRth,Os1,Os2,Os3,lnsx,lnsy,f,Nx,X_probe,x_max, obs, kT, kD, theta, T, priors)
+function [psi, grad] = axisym_nl_post_helper(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_par,lnCs,lnas,lnRth,Os1,Os2,Os3,lnsx,lnsy,f,Nx,X_probe,x_max, obs, tau, kD, theta, T, priors)
+    kT = exp(tau);
     try
         if nargout < 2
             psi = axisym_nl_post(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_par,lnCs,lnas,lnRth,Os1,Os2,Os3,lnsx,lnsy,f,Nx,X_probe,x_max, obs, kT, kD, theta, T, priors);
+            psi = psi + nln(tau, priors.tau.mu, priors.tau.sigma);
         else
             [psi, grad] = axisym_nl_post(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_par,lnCs,lnas,lnRth,Os1,Os2,Os3,lnsx,lnsy,f,Nx,X_probe,x_max, obs, kT, kD, theta, T, priors);
-            grad = grad([1:51,53:57]);
+            [psi_tau, grad_tau] = nln(tau, priors.tau.mu, priors.tau.sigma, [true,false,false]);
+
+            psi = psi + psi_tau;
+
+            grad(52) = grad(52) + grad_tau;
         end
     catch err
         ts = string(datetime("now", 'Format', 'yyyy-MM-dd_HH-mm-ss'));
