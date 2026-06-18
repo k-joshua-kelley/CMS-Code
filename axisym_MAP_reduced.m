@@ -120,7 +120,7 @@ function [psi, grad] = axisym_nl_post_helper(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_
 
             psi = psi + psi_tau;
 
-            grad(52) = grad(52) + grad_tau{1};
+            grad(52) = kT * grad(52) + grad_tau{1};
         end
     catch err
         ts = string(datetime("now", 'Format', 'yyyy-MM-dd_HH-mm-ss'));
