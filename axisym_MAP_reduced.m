@@ -51,6 +51,9 @@ x0 = zeros(57,1);
 x0([1:51,53:end]) = x;
 x0(52) = log(1e4);
 
+[psi, grad] = nl_post_handle(x0);
+%%
+
 [~, err] = checkGradients(@check_nonlcon, x0, options, "Display","on");
 max(abs(err.Objective(:)))
 [~, err] = checkGradients(nl_post_handle, x0, options, "Display","on");
@@ -117,7 +120,7 @@ function [psi, grad] = axisym_nl_post_helper(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_
 
             psi = psi + psi_tau;
 
-            grad(52) = grad(52) + grad_tau;
+            grad(52) = grad(52) + grad_tau{1};
         end
     catch err
         ts = string(datetime("now", 'Format', 'yyyy-MM-dd_HH-mm-ss'));
