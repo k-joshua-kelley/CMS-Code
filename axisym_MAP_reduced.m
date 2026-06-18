@@ -126,6 +126,6 @@ function [psi, grad] = axisym_nl_post_helper(lnkf,lnCf,lnaf,lnhf,lnks_perp,lnks_
         ts = string(datetime("now", 'Format', 'yyyy-MM-dd_HH-mm-ss'));
         save("error_" + ts + ".mat", "lnkf", "lnCf", "lnaf", "lnhf", "lnks_perp", "lnks_par", "lnCs", "lnas", "lnRth", "Os1", "Os2", "Os3", "lnsx", "lnsy", "f", "Nx", "X_probe", "x_max", "obs", "kT", "kD", "theta", "T", "priors", "err")
         psi = NaN;
-        grad = NaN(56,1);
+        grad = NaN(57,1);
     end
 end
