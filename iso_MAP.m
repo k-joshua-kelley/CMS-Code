@@ -7,30 +7,34 @@ f    = data.f;
 Nx   = 160;
 dr   = data.dr;
 obs  = data.mu;
-kD   = data.kappa;
+kD   = 100*data.kappa;
 lnsx = log(2);
 lnsy = log(2);
+
+true_params = load("True_Params\optical_properties.mat");
+lnaf = log(true_params.gold.alpha);
+lnas = log(true_params.ZrO2.alpha);
+lnRth = -inf;
 
 % Load Priors
 load("iso_priors.mat");
 
 % format objective functions for Temp-coupled and Temp-independent
 % objectives
-nl_post_obj = @(x) nl_post(x(1:7), x(8:14), x(15), x(16), x(17:23), x(24:30), x(31), x(32), x(33), x(34:37), kD, obs, lnsx, lnsy, f, Nx, dr, T, priors);
-nl_post_ind_obj = @(x,i) nl_post_ind(x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), kD(i,:,:,:), obs(i,:,:,:), lnsx, lnsy, f, Nx, dr, priors);
+nl_post_obj = @(x) iso_nl_post(x(1:7), x(8:14), lnaf, x(15), x(16:22), x(23:29), lnas, lnRth, x(30), x(31:34), kD, obs, lnsx, lnsy, f, Nx, dr, T, priors);
+nl_post_ind_obj = @(x,i) nl_post_ind(x(1), x(2), lnaf, x(3), x(4), x(5), lnas, lnRth, x(6), kD(i,:,:,:), obs(i,:,:,:), lnsx, lnsy, f, Nx, dr, priors);
 
 % warm start (temp-independent)
 x0_ind = [normrnd(priors.lnkf.mu, priors.lnkf.sigma)
       normrnd(priors.lnCf.mu, priors.lnCf.sigma)
-      normrnd(priors.lnaf.mu, priors.lnaf.sigma)
       normrnd(priors.lnhf.mu, priors.lnhf.sigma)
       normrnd(priors.lnks.mu, priors.lnks.sigma)
       normrnd(priors.lnCs.mu, priors.lnCs.sigma)
-      normrnd(priors.lnas.mu, priors.lnas.sigma)
-      normrnd(priors.lnRth.mu, priors.lnRth.sigma)
-      0];
+      normrnd(priors.tau.mu, priors.tau.sigma)];
 
 options = optimoptions("fminunc", Display="iter-detailed", SpecifyObjectiveGradient=true, FiniteDifferenceType="central");
+
+[~, err_ind] = checkGradients(@(x) nl_post_ind_obj(x,1), x0_ind, options, "Display","on");
 
 x_ind = cell(length(T),1);
 fval_ind = cell(length(T),1);
@@ -44,14 +48,16 @@ end
 x_hat = horzcat(x_ind{:});
 
 %% Temperature-Coupled
-x0 = [x_hat(1,:), x_hat(2,:), mean(x_hat(3,:)), mean(x_hat(4,:)), x_hat(5,:), x_hat(6,:), mean(x_hat(7,:)), mean(x_hat(8,:)), min(x_hat(9,:))].';
-
+x0 = [x_hat(1,:), x_hat(2,:), mean(x_hat(3,:)), x_hat(4,:), x_hat(5,:), mean(x_hat(6,:))].';
 x0 = [x0; normrnd(priors.theta.mu, priors.theta.sigma, 4, 1)];
+
+[~, err] = checkGradients(nl_post_obj, x0, options, "Display","on");
 [x,fval,exitflag,output,grad,hessian] = fminunc(nl_post_obj, x0, options);
 
 save("iso_MAP_results.mat", "x", "fval", "exitflag", "output", "grad", "hessian", "x_ind", "fval_ind", "exitflag_ind", "output_ind", "grad_ind", "hessian_ind")
 
-function [psi, grad] = nl_post_ind(lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth, kT, kD, obs, lnsx, lnsy, f, Nx, dr, priors)
+function [psi, grad] = nl_post_ind(lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth, tau, kD, obs, lnsx, lnsy, f, Nx, dr, priors)
+    kT = exp(tau);
     % random variables: lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth,
     % kT, theta
 
@@ -70,31 +76,30 @@ function [psi, grad] = nl_post_ind(lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnR
         psi_nll      = iso_nll_M(lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth, kT, kD, obs, lnsx, lnsy, f, Nx, dr);
         phi_GP_lnkf  = nln(lnkf, priors.lnkf.mu, priors.lnkf.sigma, [true, false, false]);
         phi_GP_lnCf  = nln(lnCf, priors.lnCf.mu, priors.lnCf.sigma, [true, false, false]);
-        phi_GP_lnaf  = nln(lnaf, priors.lnaf.mu, priors.lnaf.sigma, [true, false, false]);
         phi_GP_lnhf  = nln(lnhf, priors.lnhf.mu, priors.lnhf.sigma, [true, false, false]);
         phi_GP_lnks  = nln(lnks, priors.lnks.mu, priors.lnks.sigma, [true, false, false]);
         phi_GP_lnCs  = nln(lnCs, priors.lnCs.mu, priors.lnCs.sigma, [true, false, false]);
-        phi_GP_lnas  = nln(lnas, priors.lnas.mu, priors.lnas.sigma, [true, false, false]);
-        phi_GP_lnRth = nln(lnRth, priors.lnRth.mu, priors.lnRth.sigma, [true, false, false]);
+        psi_tau = nln(tau, priors.tau.mu, priors.tau.sigma, [true,false,false]);
     else
         [psi_nll, grad_nll] = iso_nll_M(lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth, kT, kD, obs, lnsx, lnsy, f, Nx, dr);
         [phi_GP_lnkf, grad_GP_lnkf]   = nln(lnkf, priors.lnkf.mu, priors.lnkf.sigma, [true, false, false]);
         [phi_GP_lnCf, grad_GP_lnCf]   = nln(lnCf, priors.lnCf.mu, priors.lnCf.sigma, [true, false, false]);
-        [phi_GP_lnaf, grad_GP_lnaf]   = nln(lnaf, priors.lnaf.mu, priors.lnaf.sigma, [true, false, false]);
         [phi_GP_lnhf, grad_GP_lnhf]   = nln(lnhf, priors.lnhf.mu, priors.lnhf.sigma, [true, false, false]);
         [phi_GP_lnks, grad_GP_lnks]   = nln(lnks, priors.lnks.mu, priors.lnks.sigma, [true, false, false]);
         [phi_GP_lnCs, grad_GP_lnCs]   = nln(lnCs, priors.lnCs.mu, priors.lnCs.sigma, [true, false, false]);
-        [phi_GP_lnas, grad_GP_lnas]   = nln(lnas, priors.lnas.mu, priors.lnas.sigma, [true, false, false]);
-        [phi_GP_lnRth, grad_GP_lnRth] = nln(lnRth, priors.lnRth.mu, priors.lnRth.sigma, [true, false, false]);
+        [psi_tau, grad_tau] = nln(tau, priors.tau.mu, priors.tau.sigma, [true,false,false]);
 
-        grad_GP = [grad_GP_lnkf{1}; grad_GP_lnCf{1}; grad_GP_lnaf{1}; grad_GP_lnhf{1}; grad_GP_lnks{1}; grad_GP_lnCs{1}; grad_GP_lnas{1}; grad_GP_lnRth{1}; 0];
+        grad_GP = [grad_GP_lnkf{1}; grad_GP_lnCf{1}; 0; grad_GP_lnhf{1}; grad_GP_lnks{1}; grad_GP_lnCs{1}; 0; 0; 0];
 
         grad = grad_nll + grad_GP;
+        grad(9) = kT*grad(9) + grad_tau{1};
+        grad = grad([1:2,4:6,9]);
+        
         % if any(isnan(grad))
         %     pause(1);
         % end
     end
-    psi = psi_nll + phi_GP_lnkf + phi_GP_lnCf + phi_GP_lnaf + phi_GP_lnhf + phi_GP_lnks + phi_GP_lnCs + phi_GP_lnas + phi_GP_lnRth;
+    psi = psi_nll + phi_GP_lnkf + phi_GP_lnCf + phi_GP_lnhf + phi_GP_lnks + phi_GP_lnCs + psi_tau;
     % if isnan(psi)
     %     pause(1);
     % end

@@ -1,7 +1,7 @@
 clear; clc; close all;
 
 load("axisym_MAP_results1660744828.mat")
-load("axisym_MAP_results_reduced(7)1660744828.mat")
+load("axisym_MAP_results_reduced(8)1660744828.mat")
 
 rng(seed2.Seed);
 
@@ -32,7 +32,8 @@ x_max = max(max(sqrt(X_probe(:,1).^2+X_probe(:,2).^2))*10, 1*max(Lthf, Lths));
 
 load("axisym_priors.mat")
 
-Oi = randperm(10,5);
+Oi = randperm(10,5)
+%%
 
 nl_post_handle = @(x) axisym_nl_post_helper(x(1:7),x(8:14),lnaf,x(15),x(16:22),x(23:29),x(30:36),lnas,lnRth,x(37:41),x(42:46),x(47:51),lnsx,lnsy,f,Nx,X_probe,x_max, data.mu(:,Oi,:,:), x(52), 100*data.kappa(:,Oi,:,:), x(53:57), T, priors);
 
@@ -48,6 +49,8 @@ options = optimoptions("fmincon", ...
 );
 
 x0 = x;
+x0(1:7) = log(100);
+x0(8:14) = log(2);
 
 [~, err] = checkGradients(@check_nonlcon, x0, options, "Display","on");
 max(abs(err.Objective(:)))
@@ -57,7 +60,7 @@ max(abs(err.Objective(:)))
 
 H = central_diff_hessian(nl_post_handle, x, 1e-4);
 
-save("axisym_MAP_results_reduced(8)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "H");
+save("axisym_MAP_results_reduced(9)"+seed2.Seed+".mat", "x", "fval", "exitflag", "output", "lambda", "grad", "H");
 
 function [eq, Jeq] = check_nonlcon(x)
     [~, eq, ~, Geq] = nonlcon(x);
