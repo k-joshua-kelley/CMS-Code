@@ -4,14 +4,14 @@ clear; clc; close all;
 data = load("Data/iso_data_stats.mat");
 T    = data.T;
 f    = data.f;
-Nx   = 160;
+Nx   = 256;
 dr   = data.dr;
 obs  = data.mu;
 kD   = 100*data.kappa;
 lnsx = log(2);
 lnsy = log(2);
 
-true_params = load("True_Params\optical_properties.mat");
+true_params = load("True_Params/optical_properties.mat");
 lnaf = log(true_params.gold.alpha);
 lnas = log(true_params.ZrO2.alpha);
 lnRth = -inf;
@@ -23,7 +23,7 @@ load("iso_priors.mat");
 % objectives
 nl_post_obj = @(x) iso_nl_post(x(1:7), x(8:14), lnaf, x(15), x(16:22), x(23:29), lnas, lnRth, x(30), x(31:34), kD, obs, lnsx, lnsy, f, Nx*2, dr, T, priors);
 
-options = optimoptions("fminunc", Display="iter-detailed", SpecifyObjectiveGradient=true, FiniteDifferenceType="central", StepTolerance=1e-10);
+options = optimoptions("fminunc", Display="iter-detailed", SpecifyObjectiveGradient=true, FiniteDifferenceType="central", StepTolerance=1e-10, FunctionTolerance=1e-10);
 
 %% Temperature-Coupled
 MAP = load("iso_MAP_results.mat");
@@ -32,7 +32,7 @@ x0 = MAP.x;
 [~, err] = checkGradients(nl_post_obj, x0, options, "Display","on");
 [x,fval,exitflag,output,grad,hessian] = fminunc(nl_post_obj, x0, options);
 
-save("iso_MAP_results_refined.mat", "x", "fval", "exitflag", "output", "grad", "hessian")
+save("iso_MAP_results_refined_"+Nx+".mat", "x", "fval", "exitflag", "output", "grad", "hessian")
 
 function [psi, grad] = nl_post_ind(lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth, tau, kD, obs, lnsx, lnsy, f, Nx, dr, priors)
     kT = exp(tau);
