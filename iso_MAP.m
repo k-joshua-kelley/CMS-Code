@@ -53,7 +53,7 @@ x0 = [x0; normrnd(priors.theta.mu, priors.theta.sigma, 4, 1)];
 
 [~, err] = checkGradients(nl_post_obj, x0, options, "Display","on");
 [x,fval,exitflag,output,grad,hessian] = fminunc(nl_post_obj, x0, options);
-
+%%
 save("iso_MAP_results.mat", "x", "fval", "exitflag", "output", "grad", "hessian", "x_ind", "fval_ind", "exitflag_ind", "output_ind", "grad_ind", "hessian_ind")
 
 function [psi, grad] = nl_post_ind(lnkf, lnCf, lnaf, lnhf, lnks, lnCs, lnas, lnRth, tau, kD, obs, lnsx, lnsy, f, Nx, dr, priors)

@@ -21,7 +21,7 @@ load("iso_priors.mat");
 
 % format objective functions for Temp-coupled and Temp-independent
 % objectives
-nl_post_obj = @(x) iso_nl_post(x(1:7), x(8:14), lnaf, x(15), x(16:22), x(23:29), lnas, lnRth, x(30), x(31:34), kD, obs, lnsx, lnsy, f, Nx*2, dr, T, priors);
+nl_post_obj = @(x) iso_nl_post(x(1:7), x(8:14), lnaf, x(15), x(16:22), x(23:29), lnas, lnRth, x(30), x(31:34), kD, obs, lnsx, lnsy, f, Nx, dr, T, priors);
 
 options = optimoptions("fminunc", Display="iter-detailed", SpecifyObjectiveGradient=true, FiniteDifferenceType="central", StepTolerance=1e-10, FunctionTolerance=1e-10);
 
@@ -29,6 +29,11 @@ options = optimoptions("fminunc", Display="iter-detailed", SpecifyObjectiveGradi
 MAP = load("iso_MAP_results.mat");
 x0 = MAP.x;
 
+profile on
+[psi, Jac] = nl_post_obj(x0);
+profile off
+
+%%
 [~, err] = checkGradients(nl_post_obj, x0, options, "Display","on");
 [x,fval,exitflag,output,grad,hessian] = fminunc(nl_post_obj, x0, options);
 
