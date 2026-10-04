@@ -1,4 +1,4 @@
-clear; clc; close all;
+% clear; clc; close all;
 
 % Experimental Parameters (known)
 data = load("Data/iso_data_stats.mat");
@@ -22,36 +22,36 @@ load("iso_priors.mat");
 % format objective functions for Temp-coupled and Temp-independent
 % objectives
 nl_post_obj = @(x) iso_nl_post(x(1:7), x(8:14), lnaf, x(15), x(16:22), x(23:29), lnas, lnRth, x(30), x(31:34), kD, obs, lnsx, lnsy, f, Nx, dr, T, priors);
-nl_post_ind_obj = @(x,i) nl_post_ind(x(1), x(2), lnaf, x(3), x(4), x(5), lnas, lnRth, x(6), kD(i,:,:,:), obs(i,:,:,:), lnsx, lnsy, f, Nx, dr, priors);
+% nl_post_ind_obj = @(x,i) nl_post_ind(x(1), x(2), lnaf, x(3), x(4), x(5), lnas, lnRth, x(6), kD(i,:,:,:), obs(i,:,:,:), lnsx, lnsy, f, Nx, dr, priors);
 
 % warm start (temp-independent)
-x0_ind = [normrnd(priors.lnkf.mu, priors.lnkf.sigma)
-      normrnd(priors.lnCf.mu, priors.lnCf.sigma)
-      normrnd(priors.lnhf.mu, priors.lnhf.sigma)
-      normrnd(priors.lnks.mu, priors.lnks.sigma)
-      normrnd(priors.lnCs.mu, priors.lnCs.sigma)
-      normrnd(priors.tau.mu, priors.tau.sigma)];
+% x0_ind = [normrnd(priors.lnkf.mu, priors.lnkf.sigma)
+%       normrnd(priors.lnCf.mu, priors.lnCf.sigma)
+%       normrnd(priors.lnhf.mu, priors.lnhf.sigma)
+%       normrnd(priors.lnks.mu, priors.lnks.sigma)
+%       normrnd(priors.lnCs.mu, priors.lnCs.sigma)
+%       normrnd(priors.tau.mu, priors.tau.sigma)];
 
 options = optimoptions("fminunc", Display="iter-detailed", SpecifyObjectiveGradient=true, FiniteDifferenceType="central");
 
-[~, err_ind] = checkGradients(@(x) nl_post_ind_obj(x,1), x0_ind, options, "Display","on");
+% [~, err_ind] = checkGradients(@(x) nl_post_ind_obj(x,1), x0_ind, options, "Display","on");
 
-x_ind = cell(length(T),1);
-fval_ind = cell(length(T),1);
-exitflag_ind = cell(length(T),1);
-output_ind = cell(length(T),1);
-grad_ind = cell(length(T),1);
-hessian_ind = cell(length(T),1);
-for i = 1:length(T)
-    [x_ind{i}, fval_ind{i}, exitflag_ind{i}, output_ind{i}, grad_ind{i}, hessian_ind{i}] = fminunc(@(x) nl_post_ind_obj(x,i), x0_ind, options);
-end
-x_hat = horzcat(x_ind{:});
+% x_ind = cell(length(T),1);
+% fval_ind = cell(length(T),1);
+% exitflag_ind = cell(length(T),1);
+% output_ind = cell(length(T),1);
+% grad_ind = cell(length(T),1);
+% hessian_ind = cell(length(T),1);
+% % for i = 1:length(T)
+% %     [x_ind{i}, fval_ind{i}, exitflag_ind{i}, output_ind{i}, grad_ind{i}, hessian_ind{i}] = fminunc(@(x) nl_post_ind_obj(x,i), x0_ind, options);
+% % end
+% x_hat = horzcat(x_ind{:});
 
 %% Temperature-Coupled
-x0 = [x_hat(1,:), x_hat(2,:), mean(x_hat(3,:)), x_hat(4,:), x_hat(5,:), mean(x_hat(6,:))].';
-x0 = [x0; normrnd(priors.theta.mu, priors.theta.sigma, 4, 1)];
+% x0 = [x_hat(1,:), x_hat(2,:), mean(x_hat(3,:)), x_hat(4,:), x_hat(5,:), mean(x_hat(6,:))].';
+% x0 = [x0; normrnd(priors.theta.mu, priors.theta.sigma, 4, 1)];
 
-[~, err] = checkGradients(nl_post_obj, x0, options, "Display","on");
+% [~, err] = checkGradients(nl_post_obj, x0, options, "Display","on");
 [x,fval,exitflag,output,grad,hessian] = fminunc(nl_post_obj, x0, options);
 %%
 save("iso_MAP_results.mat", "x", "fval", "exitflag", "output", "grad", "hessian", "x_ind", "fval_ind", "exitflag_ind", "output_ind", "grad_ind", "hessian_ind")
