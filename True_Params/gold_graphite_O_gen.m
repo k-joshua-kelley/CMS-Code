@@ -12,7 +12,7 @@ plot3([0,0],[0,0],[0,1], 'b')
 quiver3(zeros(size(v(:,1))),zeros(size(v(:,1))),zeros(size(v(:,1))),v(:,1), v(:,2), v(:,3), 1, Color='k')
 axis equal
 
-save("gold_graphite_O.mat", "v")
+% save("gold_graphite_O.mat", "v")
 
 function v = noisy_y(sigma, N)    
     % Sample polar angle (angle from +y axis)
